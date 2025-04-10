@@ -1,26 +1,31 @@
-import { StyleSheet, Text, View, StatusBar } from 'react-native';
-import CameraScreen from './src/Camera';
-import GeolocationScreen from './src/GeoLocation';
-import NotificationScreen from './src/LocalPushNotification';
-import AsyncStorage from './src/AsycnStorage';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './screens/HomeScreen';
+import TravelEntryScreen from './screens/TravelEntryScreen';
+
+export type RootStackParamList = {
+  Home: undefined;
+  TravelEntry: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <CameraScreen></CameraScreen>
-      {/* <GeolocationScreen></GeolocationScreen> */}
-      {/* <NotificationScreen></NotificationScreen> */}
-      {/* <AsyncStorageTest></AsyncStorageTest> */}
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen} 
+          options={{ title: 'Travel Diary' }} 
+        />
+        <Stack.Screen 
+          name="TravelEntry" 
+          component={TravelEntryScreen} 
+          options={{ title: 'Add Travel Entry' }} 
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingTop: StatusBar.currentHeight,
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
