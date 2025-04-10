@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { useTheme } from '../src/ThemeContext'; // Import the useTheme hook
 
 interface TravelEntry {
   imageUri: string;
@@ -9,6 +10,7 @@ interface TravelEntry {
 }
 
 const HomeScreen = () => {
+  const { theme } = useTheme(); // Get the current theme
   const [entries, setEntries] = useState<TravelEntry[]>([]);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
@@ -19,11 +21,11 @@ const HomeScreen = () => {
       const parsed = stored ? JSON.parse(stored) : [];
       setEntries(parsed);
     };
-  
+
     if (isFocused) {
       loadEntries();
     }
-  }, [isFocused]);  
+  }, [isFocused]);
 
   const removeEntry = async (index: number) => {
     const updated = [...entries];
@@ -33,30 +35,32 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {entries.length === 0 ? (
-        <Text style={styles.emptyText}>No Entries yet</Text>
-      ) : (
-        <FlatList
-          data={entries}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <View style={styles.entry}>
-              <Image source={{ uri: item.imageUri }} style={styles.image} />
-              <Text style={styles.address}>{item.address}</Text>
-              <Button title="Remove" color="red" onPress={() => removeEntry(index)} />
-            </View>
-          )}
-        />
-      )}
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <View style={styles.container}>
+        {entries.length === 0 ? (
+          <Text style={[styles.emptyText, { color: theme.colors.text }]}>No Entries yet</Text>
+        ) : (
+          <FlatList
+            data={entries}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <View style={styles.entry}>
+                <Image source={{ uri: item.imageUri }} style={styles.image} />
+                <Text style={[styles.address, { color: theme.colors.text }]}>{item.address}</Text>
+                <Button title="Remove" color={theme.colors.primary} onPress={() => removeEntry(index)} />
+              </View>
+            )}
+          />
+        )}
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('TravelEntry' as never)}
-      >
-        <Text style={styles.fabIcon}>+</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate('TravelEntry' as never)}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 

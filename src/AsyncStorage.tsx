@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface TravelEntry {
@@ -19,7 +19,8 @@ const AsyncStorageHandler = () => {
           setTravelEntries(JSON.parse(value));
         }
       } catch (e) {
-        console.log('Failed to load entries.');
+        console.error('Failed to load entries from AsyncStorage.', e);
+        Alert.alert('Error', 'Failed to load your travel entries.');
       }
     };
 
@@ -33,7 +34,8 @@ const AsyncStorageHandler = () => {
       await AsyncStorage.setItem('travelEntries', JSON.stringify(updatedEntries));
       setTravelEntries(updatedEntries);
     } catch (e) {
-      console.log('Failed to save entry.');
+      console.error('Failed to save entry to AsyncStorage.', e);
+      Alert.alert('Error', 'Failed to save your entry. Please try again.');
     }
   };
 
@@ -44,7 +46,8 @@ const AsyncStorageHandler = () => {
       await AsyncStorage.setItem('travelEntries', JSON.stringify(updatedEntries));
       setTravelEntries(updatedEntries);
     } catch (e) {
-      console.log('Failed to remove entry.');
+      console.error('Failed to remove entry from AsyncStorage.', e);
+      Alert.alert('Error', 'Failed to remove your entry. Please try again.');
     }
   };
 

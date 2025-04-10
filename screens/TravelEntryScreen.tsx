@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, Button, Image, StyleSheet, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '../src/ThemeContext'; // Import the useTheme hook
 
 const TravelEntryScreen = () => {
+  const { theme } = useTheme(); // Get the current theme
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [address, setAddress] = useState<string>('');
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
@@ -55,29 +57,29 @@ const TravelEntryScreen = () => {
 
   const handleSave = async () => {
     if (!imageUri || !address) return;
-  
+
     try {
       const newEntry = { imageUri, address };
       const stored = await AsyncStorage.getItem('entries');
       const parsed = stored ? JSON.parse(stored) : [];
-  
+
       parsed.push(newEntry);
       await AsyncStorage.setItem('entries', JSON.stringify(parsed));
-  
+
       // Send notification
       await sendNotification();
-  
+
       // Reset local state
       setImageUri(null);
       setAddress('');
-  
+
       // Navigate back to Home
       navigation.goBack();
     } catch (e) {
       console.error('Error saving entry:', e);
     }
   };
-  
+
   const sendNotification = async () => {
     try {
       await Notifications.scheduleNotificationAsync({
@@ -92,7 +94,6 @@ const TravelEntryScreen = () => {
       console.error('Failed to send notification:', e);
     }
   };
-  
 
   useFocusEffect(
     React.useCallback(() => {
@@ -105,16 +106,18 @@ const TravelEntryScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <Button title="Take a Picture" onPress={takePicture} />
-      {imageUri && (
-        <>
-          <Image source={{ uri: imageUri }} style={styles.image} />
-          <Text style={styles.address}>{address}</Text>
-          <Button title="Save Entry" onPress={handleSave} />
-        </>
-      )}
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <View style={styles.container}>
+        <Button title="Take a Picture" onPress={takePicture} color={theme.colors.primary} />
+        {imageUri && (
+          <>
+            <Image source={{ uri: imageUri }} style={styles.image} />
+            <Text style={[styles.address, { color: theme.colors.text }]}>{address}</Text>
+            <Button title="Save Entry" onPress={handleSave} color={theme.colors.primary} />
+          </>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
