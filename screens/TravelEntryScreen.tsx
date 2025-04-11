@@ -5,10 +5,10 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { useTheme } from '../src/ThemeContext'; // Import the useTheme hook
+import { useTheme } from '@react-navigation/native';
 
 const TravelEntryScreen = () => {
-  const { theme } = useTheme(); // Get the current theme
+  const { colors } = useTheme(); // Get the current theme
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [address, setAddress] = useState<string>('');
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
@@ -106,14 +106,14 @@ const TravelEntryScreen = () => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.container}>
-        <Button title="Take a Picture" onPress={takePicture} color={theme.colors.primary} />
+        <Button title="Take a Picture" onPress={takePicture} color={colors.primary} />
         {imageUri && (
           <>
             <Image source={{ uri: imageUri }} style={styles.image} />
-            <Text style={[styles.address, { color: theme.colors.text }]}>{address}</Text>
-            <Button title="Save Entry" onPress={handleSave} color={theme.colors.primary} />
+            <Text style={[styles.address, { color: colors.text }]}>{address}</Text>
+            <Button title="Save Entry" onPress={handleSave} color={colors.primary} />
           </>
         )}
       </View>

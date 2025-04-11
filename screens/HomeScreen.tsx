@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
-import { useTheme } from '../src/ThemeContext'; // Import the useTheme hook
+import { useTheme } from '@react-navigation/native';
 
 interface TravelEntry {
   imageUri: string;
@@ -10,7 +10,7 @@ interface TravelEntry {
 }
 
 const HomeScreen = () => {
-  const { theme } = useTheme(); // Get the current theme
+  const { colors } = useTheme(); // Get the current theme
   const [entries, setEntries] = useState<TravelEntry[]>([]);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
@@ -35,10 +35,10 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.container}>
         {entries.length === 0 ? (
-          <Text style={[styles.emptyText, { color: theme.colors.text }]}>No Entries yet</Text>
+          <Text style={[styles.emptyText, { color: colors.text }]}>No Entries yet</Text>
         ) : (
           <FlatList
             data={entries}
@@ -46,8 +46,8 @@ const HomeScreen = () => {
             renderItem={({ item, index }) => (
               <View style={styles.entry}>
                 <Image source={{ uri: item.imageUri }} style={styles.image} />
-                <Text style={[styles.address, { color: theme.colors.text }]}>{item.address}</Text>
-                <Button title="Remove" color={theme.colors.primary} onPress={() => removeEntry(index)} />
+                <Text style={[styles.address, { color: colors.text }]}>{item.address}</Text>
+                <Button title="Remove" color="red" onPress={() => removeEntry(index)} />
               </View>
             )}
           />

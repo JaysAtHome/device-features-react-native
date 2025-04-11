@@ -1,15 +1,14 @@
 import * as Notifications from 'expo-notifications';
 
-// Function to schedule a local notification
 export const sendNotification = async (): Promise<void> => {
   try {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'New Travel Entry',
         body: 'You have successfully added a new travel entry!',
-        sound: 'default', // Play default notification sound
+        sound: 'default',
       },
-      trigger: null, // This ensures the notification is sent immediately (no delay)
+      trigger: null,
     });
   } catch (error) {
     console.error('Failed to send notification:', error);
@@ -17,7 +16,6 @@ export const sendNotification = async (): Promise<void> => {
   }
 };
 
-// Function to request notification permissions (if needed)
 export const requestNotificationPermission = async (): Promise<boolean> => {
   try {
     const { status } = await Notifications.requestPermissionsAsync();
