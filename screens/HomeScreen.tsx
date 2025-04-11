@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity, SafeAreaView, Alert,} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { useTheme } from '@react-navigation/native';
@@ -10,7 +10,7 @@ interface TravelEntry {
 }
 
 const HomeScreen = () => {
-  const { colors } = useTheme(); // Get the current theme
+  const { colors } = useTheme();
   const [entries, setEntries] = useState<TravelEntry[]>([]);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
@@ -27,12 +27,36 @@ const HomeScreen = () => {
     }
   }, [isFocused]);
 
+  const confirmRemoveEntry = (index: number) => {
+    Alert.alert(
+      'Remove Entry',
+      'Are you sure you want to delete this entry?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => removeEntry(index),
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const removeEntry = async (index: number) => {
     const updated = [...entries];
     updated.splice(index, 1);
     setEntries(updated);
     await AsyncStorage.setItem('entries', JSON.stringify(updated));
   };
+
+  const renderItem = ({ item, index }: { item: TravelEntry; index: number }) => (
+    <View style={styles.entry}>
+      <Image source={{ uri: item.imageUri }} style={styles.image} />
+      <Text style={[styles.address, { color: colors.text }]}>{item.address}</Text>
+      <Button title="Remove" color="red" onPress={() => confirmRemoveEntry(index)} />
+    </View>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -43,16 +67,9 @@ const HomeScreen = () => {
           <FlatList
             data={entries}
             keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item, index }) => (
-              <View style={styles.entry}>
-                <Image source={{ uri: item.imageUri }} style={styles.image} />
-                <Text style={[styles.address, { color: colors.text }]}>{item.address}</Text>
-                <Button title="Remove" color="red" onPress={() => removeEntry(index)} />
-              </View>
-            )}
+            renderItem={renderItem}
           />
         )}
-
         <TouchableOpacity
           style={styles.fab}
           onPress={() => navigation.navigate('TravelEntry' as never)}
