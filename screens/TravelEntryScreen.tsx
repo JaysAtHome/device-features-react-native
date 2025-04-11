@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Image, StyleSheet, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Button,
+  Image,
+  StyleSheet,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,16 +16,15 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@react-navigation/native';
 
 const TravelEntryScreen = () => {
-  const { colors } = useTheme(); // Get the current theme
+  const { colors } = useTheme();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [address, setAddress] = useState<string>('');
-  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
   const navigation = useNavigation();
 
   const takePicture = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      alert('Camera permission is required to take pictures.');
+      Alert.alert('Permission required', 'Camera permission is required to take pictures.');
       return;
     }
 
@@ -27,32 +34,32 @@ const TravelEntryScreen = () => {
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setImageUri(uri);
-      getLocationAndAddress();
+      setImageUri(result.assets[0].uri);
+      await getLocationAndAddress();
     }
   };
 
   const getLocationAndAddress = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      alert('Permission to access location was denied.');
+      Alert.alert('Permission required', 'Permission to access location was denied.');
       return;
     }
 
     const locationData = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.High,
     });
-    setLocation(locationData.coords);
 
     const addressData = await Location.reverseGeocodeAsync({
       latitude: locationData.coords.latitude,
       longitude: locationData.coords.longitude,
     });
 
-    const { name, city, region, postalCode } = addressData[0];
-    const fullAddress = `${name}, ${city}, ${region} ${postalCode}`;
-    setAddress(fullAddress);
+    if (addressData.length > 0) {
+      const { name, city, region, postalCode } = addressData[0];
+      const fullAddress = `${name}, ${city}, ${region} ${postalCode}`;
+      setAddress(fullAddress);
+    }
   };
 
   const handleSave = async () => {
@@ -65,33 +72,13 @@ const TravelEntryScreen = () => {
 
       parsed.push(newEntry);
       await AsyncStorage.setItem('entries', JSON.stringify(parsed));
-
-      // Send notification
       await sendNotification();
 
-      // Reset local state
       setImageUri(null);
       setAddress('');
-
-      // Navigate back to Home
       navigation.goBack();
     } catch (e) {
       console.error('Error saving entry:', e);
-    }
-  };
-
-  const sendNotification = async () => {
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'New Travel Entry',
-          body: 'You have successfully added a new travel entry!',
-          sound: 'default',
-        },
-        trigger: null, // Immediate notification
-      });
-    } catch (e) {
-      console.error('Failed to send notification:', e);
     }
   };
 
@@ -100,7 +87,6 @@ const TravelEntryScreen = () => {
       return () => {
         setImageUri(null);
         setAddress('');
-        setLocation(null);
       };
     }, [])
   );
@@ -119,6 +105,21 @@ const TravelEntryScreen = () => {
       </View>
     </SafeAreaView>
   );
+};
+
+const sendNotification = async () => {
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'New Travel Entry',
+        body: 'You have successfully added a new travel entry!',
+        sound: 'default',
+      },
+      trigger: null,
+    });
+  } catch (e) {
+    console.error('Failed to send notification:', e);
+  }
 };
 
 export default TravelEntryScreen;
